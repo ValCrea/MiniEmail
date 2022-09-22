@@ -1,0 +1,13 @@
+$white: #fff;
+$light: #ddd;
+$light-blue: #86f;
+$blur: #53e;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  position: relative;
+  font-weight: normal;
+}
