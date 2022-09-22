@@ -1,15 +1,16 @@
 <script setup lang="ts"></script>
 
 <template>
-  <div>
+  <div class="app">
     <section>
-      <input type="text" />
+      <input class="search" type="text" />
     </section>
   </div>
 </template>
 
 <style scoped lang="scss">
 .app {
+  width: 100%;
   background-color: $white;
 }
 </style>
