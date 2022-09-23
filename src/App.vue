@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, type Ref } from "vue";
+import { ref, type Ref, watch } from "vue";
+import debounce from "lodash/debounce";
 
 import SelectButton from "@/components/SelectButton.vue";
 import EmailBlock from "@/components/EmailBlock.vue";
 
 import { selectButtons } from "@/utils/button-util";
-import { filters, counts } from "@/utils/mail-util";
+import { filters, counts, matchesPhrase } from "@/utils/mail-util";
 import type { Mail } from "@/utils/mail-util";
 
 const reading: Ref<Mail | null> = ref(null);
@@ -86,6 +87,13 @@ const markDelete = () => {
     mails.value[m_ind].deleted = true;
   });
 };
+
+const userSearch = ref("");
+const userSearching = ref("");
+watch(
+  userSearching,
+  debounce(() => (userSearch.value = userSearching.value.toLowerCase()), 500)
+);
 </script>
 
 <template>
@@ -118,7 +126,12 @@ const markDelete = () => {
           <p class="mobile-hidden">Compose</p>
         </button>
 
-        <input class="util__search" placeholder="Search email" type="text" />
+        <input
+          v-model="userSearching"
+          class="util__search"
+          placeholder="Search email"
+          type="text"
+        />
         <button @click="toggleSelectAll(!selectedAll)" class="util__select-all">
           <font-awesome-icon v-if="selectedAll" icon="fa-solid fa-check" />
         </button>
@@ -152,7 +165,9 @@ const markDelete = () => {
       <section class="mails">
         <template v-for="(mail, index) in mails" :key="mail">
           <EmailBlock
-            v-if="filters[selectedView](mail)"
+            v-if="
+              filters[selectedView](mail) && matchesPhrase(mail, userSearch)
+            "
             :mail="mail"
             @set-read="setRead(index)"
             @toggle-star="toggleStar(index)"

@@ -9,6 +9,13 @@ export type Mail = {
   selected?: boolean;
 };
 
+export const matchesPhrase = (mail: Mail, phrase: string): boolean => {
+  if (!phrase) return true;
+
+  const regex = new RegExp(phrase, "i");
+  return mail.author.match(regex) || mail.content.match(regex) ? true : false;
+};
+
 const filterInbox = (mail: Mail): boolean => {
   return !mail.deleted && !mail.spam;
 };
