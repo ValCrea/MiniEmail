@@ -127,6 +127,16 @@ const highlightSearch = () => {
 };
 watch(reading, () => nextTick(highlightSearch));
 watch(userSearch, () => nextTick(highlightSearch));
+
+const inputFrom = ref("");
+const inputContent = ref("");
+const sendMail = () => {
+  writing.value = false;
+  mails.value.push({
+    author: inputFrom.value,
+    content: inputContent.value,
+  });
+};
 </script>
 
 <template>
@@ -175,7 +185,7 @@ watch(userSearch, () => nextTick(highlightSearch));
       />
 
       <button
-        v-if="!reading"
+        v-if="!reading && !writing"
         @click="toggleSelectAll(!selectedAll)"
         class="util__select-all"
       >
@@ -210,16 +220,28 @@ watch(userSearch, () => nextTick(highlightSearch));
       <section v-else-if="writing" class="new-mail">
         <div class="new-mail__from-form">
           <label for="from">From: </label>
-          <input class="new-mail__from" id="from" type="text" />
+          <input
+            v-model="inputFrom"
+            class="new-mail__from"
+            id="from"
+            type="text"
+          />
         </div>
         <textarea
+          v-model="inputContent"
           class="new-mail__content"
           name=""
           id=""
           cols="30"
           rows="10"
         ></textarea>
-        <button class="new-mail__send">Send</button>
+        <button
+          @click="sendMail"
+          :class="{ 'new-mail__send--disabled': !inputFrom || !inputContent }"
+          class="new-mail__send"
+        >
+          Send
+        </button>
       </section>
 
       <section v-else class="mail-list__mails">
@@ -431,7 +453,7 @@ watch(userSearch, () => nextTick(highlightSearch));
 }
 
 .new-mail {
-  width: calc(100% - 19rem);
+  width: calc(100% - 15rem);
   padding: 1rem;
   margin: 1rem;
 
@@ -451,10 +473,12 @@ watch(userSearch, () => nextTick(highlightSearch));
 
     display: flex;
     flex-direction: row;
+    align-items: center;
     gap: 1rem;
   }
 
   &__from {
+    padding: 0.25rem;
     font-size: 1.2rem;
     border: solid 1px $light-gray;
     border-radius: 0.25rem;
@@ -469,6 +493,8 @@ watch(userSearch, () => nextTick(highlightSearch));
 
   &__content {
     max-width: 100%;
+    padding: 0.5rem;
+
     font-size: 1rem;
 
     border: solid 1px $light-gray;
@@ -480,6 +506,29 @@ watch(userSearch, () => nextTick(highlightSearch));
     &:focus {
       outline: none;
       border: solid 1px $gray;
+    }
+  }
+
+  &__send {
+    padding: 0.25rem;
+    width: 35%;
+
+    font-size: 1.1rem;
+    border: solid 1px $gray;
+    border-radius: 0.5rem;
+    background-color: $white;
+
+    align-self: center;
+    cursor: pointer;
+
+    &:hover {
+      background-color: $light-gray;
+    }
+
+    &--disabled {
+      cursor: not-allowed;
+      color: $gray;
+      background-color: $light-gray;
     }
   }
 }
