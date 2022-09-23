@@ -229,6 +229,10 @@ const markDelete = () => {
       &:hover {
         background-color: $light-red;
       }
+
+      @media screen and (max-width: 768px) {
+        margin-right: 5.85rem;
+      }
     }
   }
 
@@ -244,10 +248,6 @@ const markDelete = () => {
 
     &:focus {
       outline: none;
-    }
-
-    @media screen and (max-width: 768px) {
-      margin-left: 2rem;
     }
   }
 
