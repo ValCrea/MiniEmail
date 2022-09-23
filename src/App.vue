@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, type Ref, watch } from "vue";
+import { ref, type Ref, watch, nextTick } from "vue";
 import debounce from "lodash/debounce";
 
 import SelectButton from "@/components/SelectButton.vue";
@@ -24,13 +24,13 @@ const mails: Ref<Mail[]> = ref([
     read: true,
   },
   {
-    author: "Lor",
-    content: "Ipsem",
+    author: "TEST",
+    content: "Hello world a bunch of random words",
     star: true,
   },
   {
-    author: "Lore",
-    content: "Ipsem",
+    author: "test",
+    content: "mIpsem",
     read: true,
     important: true,
   },
@@ -74,6 +74,7 @@ const toggleSelectAll = (selectedStatus: boolean) => {
 const selectedView = ref(0);
 const setView = (view: number) => {
   selectedView.value = view;
+  reading.value = null;
   toggleSelectAll(false);
 };
 
@@ -94,6 +95,36 @@ watch(
   userSearching,
   debounce(() => (userSearch.value = userSearching.value.toLowerCase()), 500)
 );
+
+const readingContent = ref();
+const highlightSearch = () => {
+  if (!reading.value || !readingContent.value) return;
+
+  const content = reading.value.content;
+  if (!userSearch.value) {
+    readingContent.value.innerHTML = content;
+    return;
+  }
+
+  let highlight = "";
+  const srLen = userSearch.value.length;
+  const regex = new RegExp(userSearch.value, "gi");
+
+  let match;
+  let lastMatch = 0;
+  while ((match = regex.exec(content)) != null) {
+    let until = content.substring(lastMatch, match.index);
+    let part = content.substring(match.index, match.index + srLen);
+
+    highlight = `${highlight}${until}<span class="highlight">${part}</span>`;
+    lastMatch = match.index + srLen;
+  }
+  highlight = `${highlight}${content.substring(lastMatch, content.length)}`;
+
+  readingContent.value.innerHTML = highlight;
+};
+watch(reading, () => nextTick(highlightSearch));
+watch(userSearch, () => nextTick(highlightSearch));
 </script>
 
 <template>
@@ -125,25 +156,25 @@ watch(
           <font-awesome-icon icon="fa-solid fa-plus" />
           <p class="mobile-hidden">Compose</p>
         </button>
-
-        <input
-          v-model="userSearching"
-          class="util__search"
-          placeholder="Search email"
-          type="text"
-        />
-        <button @click="toggleSelectAll(!selectedAll)" class="util__select-all">
-          <font-awesome-icon v-if="selectedAll" icon="fa-solid fa-check" />
-        </button>
       </template>
+
+      <input
+        v-model="userSearching"
+        class="util__search"
+        placeholder="Search email"
+        type="text"
+      />
+
+      <button
+        v-if="!reading"
+        @click="toggleSelectAll(!selectedAll)"
+        class="util__select-all"
+      >
+        <font-awesome-icon v-if="selectedAll" icon="fa-solid fa-check" />
+      </button>
     </section>
 
-    <div v-if="reading" class="mail-single">
-      <p class="mail-single__author">From: {{ reading.author }}</p>
-      <p class="mail-single__content">{{ reading.content }}</p>
-    </div>
-
-    <div v-else class="mail-list">
+    <div class="mail-list">
       <section class="nav">
         <SelectButton
           v-for="(btn, index) in selectButtons"
@@ -162,7 +193,12 @@ watch(
         </SelectButton>
       </section>
 
-      <section class="mails">
+      <section v-if="reading" class="mail-list__read">
+        <p class="mail-single__author">From: {{ reading.author }}</p>
+        <p ref="readingContent" class="mail-single__content"></p>
+      </section>
+
+      <section v-else class="mail-list__mails">
         <template v-for="(mail, index) in mails" :key="mail">
           <EmailBlock
             v-if="
@@ -201,6 +237,7 @@ watch(
     padding-block: 0.5rem;
     padding-inline: 1rem;
     margin-right: 8rem;
+    margin-block: 1rem;
 
     display: flex;
     align-items: center;
@@ -220,6 +257,7 @@ watch(
     }
 
     &--back {
+      margin-right: 9.8rem;
       border: solid 2px $gray;
       color: $gray;
 
@@ -294,7 +332,6 @@ watch(
   flex-direction: column;
 
   &__count {
-    //float: right;
     margin-left: auto;
     font-size: 0.75rem;
   }
@@ -308,51 +345,56 @@ watch(
   }
 }
 
-.mails {
-  width: 100%;
-  margin-left: 0.6rem;
-  padding-block: 0.5rem;
-
-  display: flex;
-  flex-direction: column;
-
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  @media screen and (max-width: 768px) {
-    margin-left: 0;
-  }
-}
-
 .mail-list {
   display: flex;
   @media screen and (max-width: 768px) {
     flex-direction: column;
   }
-}
 
-.mail-single {
-  margin: 1rem;
-  padding: 1rem;
+  &__read {
+    width: 100%;
+    margin: 1rem;
+    padding: 1rem;
 
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 
-  background-color: $light;
+    background-color: $light;
 
-  &__author {
-    font-size: 1.2rem;
+    &__author {
+      font-size: 1.2rem;
+    }
+
+    &__content {
+      text-indent: 2rem;
+    }
   }
 
-  &__content {
-    text-indent: 2rem;
+  &__mails {
+    width: 100%;
+    margin-left: 0.6rem;
+    padding-block: 0.5rem;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    @media screen and (max-width: 768px) {
+      margin-left: 0;
+    }
   }
 }
 
 .icon {
   width: 1rem;
   height: 1rem;
+}
+
+:global(.highlight) {
+  background-color: $highlight-blue;
 }
 
 .mobile-hidden {
