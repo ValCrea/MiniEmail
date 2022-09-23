@@ -27,6 +27,9 @@ const props = defineProps<{
   cursor: pointer;
   transition: background-color 0.25s ease-out;
 
+  display: flex;
+  align-items: baseline;
+
   &--hoverable:hover {
     background-color: $light;
   }

@@ -11,9 +11,28 @@ import {
   faInbox,
   faBan,
   faTrash,
+  faStar as starSolid,
+  faBookmark as bookmarkSolid,
+  faArrowLeft,
+  faCheck,
 } from "@fortawesome/free-solid-svg-icons";
-import { faStar, faBookmark } from "@fortawesome/free-regular-svg-icons";
+import {
+  faStar as starRegular,
+  faBookmark as bookmarkRegular,
+} from "@fortawesome/free-regular-svg-icons";
 
-library.add(faUserSecret, faPlus, faInbox, faStar, faBan, faTrash, faBookmark);
+library.add(
+  faUserSecret,
+  faPlus,
+  faInbox,
+  faBan,
+  faTrash,
+  bookmarkSolid,
+  bookmarkRegular,
+  starSolid,
+  starRegular,
+  faArrowLeft,
+  faCheck
+);
 
 createApp(App).component("font-awesome-icon", FontAwesomeIcon).mount("#app");

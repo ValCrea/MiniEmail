@@ -1,9 +1,9 @@
+import { solid, regular } from "@/utils/icon-utils";
+
 type Icon = {
   type: string;
   name: string;
 };
-const solid = "fa-solid";
-const regular = "fa-regular";
 
 type Button = {
   text: string;
