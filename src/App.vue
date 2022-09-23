@@ -9,6 +9,7 @@ import { selectButtons } from "@/utils/button-util";
 import { filters, counts, matchesPhrase } from "@/utils/mail-util";
 import type { Mail } from "@/utils/mail-util";
 
+const writing = ref(false);
 const reading: Ref<Mail | null> = ref(null);
 const mails: Ref<Mail[]> = ref([
   {
@@ -75,6 +76,7 @@ const selectedView = ref(0);
 const setView = (view: number) => {
   selectedView.value = view;
   reading.value = null;
+  writing.value = false;
   toggleSelectAll(false);
 };
 
@@ -131,8 +133,11 @@ watch(userSearch, () => nextTick(highlightSearch));
   <div class="app">
     <section class="util">
       <button
-        v-if="reading"
-        @click="reading = null"
+        v-if="reading || writing"
+        @click="
+          reading = null;
+          writing = false;
+        "
         class="util__button util__button--back"
       >
         <font-awesome-icon icon="fa-solid fa-arrow-left" />
@@ -152,7 +157,11 @@ watch(userSearch, () => nextTick(highlightSearch));
           </button>
         </template>
 
-        <button v-else class="util__button util__button--new">
+        <button
+          v-else
+          @click="writing = true"
+          class="util__button util__button--new"
+        >
           <font-awesome-icon icon="fa-solid fa-plus" />
           <p class="mobile-hidden">Compose</p>
         </button>
@@ -196,6 +205,21 @@ watch(userSearch, () => nextTick(highlightSearch));
       <section v-if="reading" class="mail-list__read">
         <p class="mail-single__author">From: {{ reading.author }}</p>
         <p ref="readingContent" class="mail-single__content"></p>
+      </section>
+
+      <section v-else-if="writing" class="new-mail">
+        <div class="new-mail__from-form">
+          <label for="from">From: </label>
+          <input class="new-mail__from" id="from" type="text" />
+        </div>
+        <textarea
+          class="new-mail__content"
+          name=""
+          id=""
+          cols="30"
+          rows="10"
+        ></textarea>
+        <button class="new-mail__send">Send</button>
       </section>
 
       <section v-else class="mail-list__mails">
@@ -247,12 +271,20 @@ watch(userSearch, () => nextTick(highlightSearch));
     border-radius: 0.2rem;
     background-color: $white;
 
+    @media screen and (max-width: 768px) {
+      margin-right: 1rem;
+    }
+
     &--new {
       border: solid 2px $blue;
       color: $blue;
 
       &:hover {
         background-color: $light-blue;
+      }
+
+      @media screen and (max-width: 768px) {
+        margin-right: 1rem;
       }
     }
 
@@ -263,6 +295,10 @@ watch(userSearch, () => nextTick(highlightSearch));
 
       &:hover {
         background-color: $light-gray;
+      }
+
+      @media screen and (max-width: 768px) {
+        margin-right: 1rem;
       }
     }
 
@@ -276,6 +312,10 @@ watch(userSearch, () => nextTick(highlightSearch));
 
       &:hover {
         background-color: $light-gray;
+      }
+
+      @media screen and (max-width: 768px) {
+        margin-right: 1rem;
       }
     }
 
@@ -292,7 +332,7 @@ watch(userSearch, () => nextTick(highlightSearch));
       }
 
       @media screen and (max-width: 768px) {
-        margin-right: 5.85rem;
+        margin-right: 1rem;
       }
     }
   }
@@ -361,6 +401,7 @@ watch(userSearch, () => nextTick(highlightSearch));
     gap: 1.5rem;
 
     background-color: $light;
+    border-radius: 1rem;
 
     &__author {
       font-size: 1.2rem;
@@ -382,8 +423,63 @@ watch(userSearch, () => nextTick(highlightSearch));
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+
     @media screen and (max-width: 768px) {
       margin-left: 0;
+    }
+  }
+}
+
+.new-mail {
+  width: calc(100% - 19rem);
+  padding: 1rem;
+  margin: 1rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  background-color: $light;
+  border-radius: 1rem;
+
+  @media screen and (max-width: 768px) {
+    width: 95%;
+  }
+
+  &__from-form {
+    font-size: 1.2rem;
+
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+  }
+
+  &__from {
+    font-size: 1.2rem;
+    border: solid 1px $light-gray;
+    border-radius: 0.25rem;
+
+    flex: 1;
+
+    &:focus {
+      outline: none;
+      border: solid 1px $gray;
+    }
+  }
+
+  &__content {
+    max-width: 100%;
+    font-size: 1rem;
+
+    border: solid 1px $light-gray;
+    border-radius: 0.5rem;
+
+    resize: none;
+    flex: 1;
+
+    &:focus {
+      outline: none;
+      border: solid 1px $gray;
     }
   }
 }
