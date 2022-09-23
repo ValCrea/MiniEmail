@@ -28,7 +28,7 @@ const props = defineProps<{
   transition: background-color 0.25s ease-out;
 
   display: flex;
-  align-items: baseline;
+  align-items: center;
 
   &--hoverable:hover {
     background-color: $light;

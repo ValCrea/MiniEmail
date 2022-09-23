@@ -44,41 +44,77 @@ const toggleImportant = (index: number) => {
 };
 const setRead = (index: number) => {
   mails.value[index].read = true;
+  mails.value[index].important = false;
   reading.value = mails.value[index];
 };
 
 const selectedAll = ref(false);
-const toggleSelect = (index: number) => {
+const selectedMails = ref(new Set<number>());
+const toggleSelect = (index: number, toggleTo?: boolean) => {
+  if (toggleTo !== undefined) {
+    mails.value[index].selected = toggleTo;
+    if (toggleTo) selectedMails.value.add(index);
+    else selectedMails.value.delete(index);
+    return;
+  }
+
+  if (selectedMails.value.has(index)) selectedMails.value.delete(index);
+  else selectedMails.value.add(index);
+
   mails.value[index].selected = !mails.value[index].selected;
 };
 const toggleSelectAll = () => {
   selectedAll.value = !selectedAll.value;
-  mails.value.forEach((mail) => (mail.selected = selectedAll.value));
+  mails.value.forEach((_, index) => toggleSelect(index, selectedAll.value));
+};
+
+const markSpam = () => {
+  selectedMails.value.forEach((m_ind) => {
+    mails.value[m_ind].spam = true;
+  });
+};
+const markDelete = () => {
+  selectedMails.value.forEach((m_ind) => {
+    mails.value[m_ind].deleted = true;
+  });
 };
 </script>
 
 <template>
   <div class="app">
     <section class="util">
-      <template v-if="!reading">
-        <button class="util__button util__button--new">
-          <font-awesome-icon icon="fa-solid fa-plus" />
-          <p class="mobile-hidden">Compose</p>
-        </button>
-        <input class="util__search" placeholder="Search email" type="text" />
-        <button @click="toggleSelectAll" class="util__select-all">
-          <font-awesome-icon v-if="selectedAll" icon="fa-solid fa-check" />
-        </button>
-      </template>
-
       <button
-        v-else
+        v-if="reading"
         @click="reading = null"
         class="util__button util__button--back"
       >
         <font-awesome-icon icon="fa-solid fa-arrow-left" />
         <p class="mobile-hidden">Back</p>
       </button>
+
+      <template v-else>
+        <template v-if="selectedMails.size > 0">
+          <button @click="markSpam" class="util__button util__button--spam">
+            <font-awesome-icon icon="fa-solid fa-ban" />
+            <p class="mobile-hidden">Spam</p>
+          </button>
+
+          <button @click="markDelete" class="util__button util__button--delete">
+            <font-awesome-icon icon="fa-solid fa-trash" />
+            <p class="mobile-hidden">Delete</p>
+          </button>
+        </template>
+
+        <button v-else class="util__button util__button--new">
+          <font-awesome-icon icon="fa-solid fa-plus" />
+          <p class="mobile-hidden">Compose</p>
+        </button>
+
+        <input class="util__search" placeholder="Search email" type="text" />
+        <button @click="toggleSelectAll" class="util__select-all">
+          <font-awesome-icon v-if="selectedAll" icon="fa-solid fa-check" />
+        </button>
+      </template>
     </section>
 
     <div v-if="reading" class="mail-single">
@@ -99,7 +135,9 @@ const toggleSelectAll = () => {
             class="icon"
           />
           <span class="mobile-hidden">&nbsp;{{ btn.text }}</span>
-          <span class="nav__count">{{ counts[index](mails) }}</span>
+          <span class="nav__count mobile-hidden">{{
+            counts[index](mails)
+          }}</span>
         </SelectButton>
       </section>
 
@@ -139,6 +177,7 @@ const toggleSelectAll = () => {
   &__button {
     padding-block: 0.5rem;
     padding-inline: 1rem;
+    margin-right: 8rem;
 
     display: flex;
     align-items: center;
@@ -146,9 +185,9 @@ const toggleSelectAll = () => {
 
     font-size: 0.9rem;
     border-radius: 0.2rem;
+    background-color: $white;
 
     &--new {
-      background-color: $white;
       border: solid 2px $blue;
       color: $blue;
 
@@ -158,7 +197,6 @@ const toggleSelectAll = () => {
     }
 
     &--back {
-      background-color: $white;
       border: solid 2px $gray;
       color: $gray;
 
@@ -166,12 +204,37 @@ const toggleSelectAll = () => {
         background-color: $light-gray;
       }
     }
+
+    &--spam {
+      margin-right: 1rem;
+      padding-inline: 0.5rem;
+      gap: 0.5rem;
+
+      border: solid 2px $gray;
+      color: $gray;
+
+      &:hover {
+        background-color: $light-gray;
+      }
+    }
+
+    &--delete {
+      margin-right: 4.8rem;
+      padding-inline: 0.5rem;
+      gap: 0.5rem;
+
+      border: solid 2px $red;
+      color: $red;
+
+      &:hover {
+        background-color: $light-red;
+      }
+    }
   }
 
   &__search {
     width: 100%;
     padding: 1rem;
-    margin-left: 8rem;
 
     border: none;
     border-radius: 0.6rem;

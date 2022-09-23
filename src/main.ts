@@ -15,6 +15,7 @@ import {
   faBookmark as bookmarkSolid,
   faArrowLeft,
   faCheck,
+  faSearch,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   faStar as starRegular,
@@ -32,7 +33,8 @@ library.add(
   starSolid,
   starRegular,
   faArrowLeft,
-  faCheck
+  faCheck,
+  faSearch
 );
 
 createApp(App).component("font-awesome-icon", FontAwesomeIcon).mount("#app");
