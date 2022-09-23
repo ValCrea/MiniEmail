@@ -10,16 +10,16 @@ export type Mail = {
 };
 
 const filterInbox = (mail: Mail): boolean => {
-  return !mail.spam && !mail.deleted;
+  return !mail.deleted && !mail.spam;
 };
 const filterStar = (mail: Mail): boolean => {
-  return mail.star as boolean;
+  return (!mail.deleted && mail.star) as boolean;
 };
 const filterImportant = (mail: Mail): boolean => {
-  return mail.important as boolean;
+  return (!mail.deleted && mail.important) as boolean;
 };
 const filterSpam = (mail: Mail): boolean => {
-  return mail.spam as boolean;
+  return (!mail.deleted && mail.spam) as boolean;
 };
 const filterDeleted = (mail: Mail): boolean => {
   return mail.deleted as boolean;

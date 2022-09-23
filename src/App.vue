@@ -9,7 +9,6 @@ import { filters, counts } from "@/utils/mail-util";
 import type { Mail } from "@/utils/mail-util";
 
 const reading: Ref<Mail | null> = ref(null);
-const selectedView = ref(0);
 const mails: Ref<Mail[]> = ref([
   {
     author: "L",
@@ -63,9 +62,18 @@ const toggleSelect = (index: number, toggleTo?: boolean) => {
 
   mails.value[index].selected = !mails.value[index].selected;
 };
-const toggleSelectAll = () => {
-  selectedAll.value = !selectedAll.value;
-  mails.value.forEach((_, index) => toggleSelect(index, selectedAll.value));
+const toggleSelectAll = (selectedStatus: boolean) => {
+  selectedAll.value = selectedStatus;
+  mails.value.forEach((mail, index) => {
+    if (filters[selectedView.value](mail))
+      toggleSelect(index, selectedAll.value);
+  });
+};
+
+const selectedView = ref(0);
+const setView = (view: number) => {
+  selectedView.value = view;
+  toggleSelectAll(false);
 };
 
 const markSpam = () => {
@@ -111,7 +119,7 @@ const markDelete = () => {
         </button>
 
         <input class="util__search" placeholder="Search email" type="text" />
-        <button @click="toggleSelectAll" class="util__select-all">
+        <button @click="toggleSelectAll(!selectedAll)" class="util__select-all">
           <font-awesome-icon v-if="selectedAll" icon="fa-solid fa-check" />
         </button>
       </template>
@@ -128,7 +136,7 @@ const markDelete = () => {
           v-for="(btn, index) in selectButtons"
           :key="btn.text"
           :selected="index === selectedView"
-          @click="selectedView = index"
+          @click="setView(index)"
         >
           <font-awesome-icon
             :icon="btn.icon.type + ' ' + btn.icon.name"
